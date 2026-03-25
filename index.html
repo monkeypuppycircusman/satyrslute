@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THYRSUS — The Satyr's Lute</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=DM+Mono:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap');
+
+:root {
+  --void:   #03020a;
+  --deep:   #07050f;
+  --murk:   #0d0a1a;
+  --fog:    #151028;
+  --mist:   #1e1830;
+  --ecto:   #7affcc;
+  --soul:   #c060ff;
+  --vine:   #6a3080;
+  --vine2:  #9a50b8;
+  --vine3:  #c880e8;
+  --ivy:    #285820;
+  --ivy2:   #409838;
+  --ivy3:   #70c860;
+  --wine:   #800820;
+  --wine2:  #c02838;
+  --wine3:  #f06070;
+  --pine:   #c88830;
+  --pine2:  #e8b050;
+  --pine3:  #f8d080;
+  --hide:   #8a5830;
+  --hide2:  #b87840;
+  --hide3:  #d8a060;
+  --text:   #8a8598;
+  --text2:  #504860;
+  --text3:  #2a2438;
+  --mono:  'DM Mono', monospace;
+  --serif: 'Cormorant Garamond', serif;
+  --goth:  'UnifrakturMaguntia', cursive;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  background: var(--void);
+  overflow: hidden;
+  font-family: var(--mono);
+  cursor: none;
+}
+
+#cursor {
+  position: fixed; width: 26px; height: 26px;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+}
+#cursor svg { width: 100%; height: 100%; }
+
+#atmos { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+#app {
+  position: relative; width: 100vw; height: 100vh;
+  display: flex; flex-direction: column; z-index: 1;
+}
+
+/* ── HEADER ── */
+#hdr {
+  flex-shrink: 0; padding: 18px 28px 14px;
+  display: flex; align-items: baseline; gap: 18px;
+  border-bottom: 1px solid var(--text3);
+  background: linear-gradient(180deg, rgba(7,5,15,.97) 0%, transparent 100%);
+  position: relative; z-index: 2;
+}
+#logo {
+  font-family: var(--goth); font-size: 36px; color: var(--pine2);
+  text-shadow: 0 0 22px var(--pine), 0 0 70px rgba(200,136,48,.2);
+  letter-spacing: 4px; line-height: 1;
+}
+#logo-sub {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 3px;
+  color: var(--text3); text-transform: uppercase;
+}
+#hdr-stats { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.hstat { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; color: var(--text3); text-transform: uppercase; }
+.hstat span { color: var(--text2); transition: color .1s; }
+.hstat span.lit-pine  { color: var(--pine3);  text-shadow: 0 0 8px var(--pine); }
+.hstat span.lit-vine  { color: var(--vine3);  text-shadow: 0 0 8px var(--vine); }
+.hstat span.lit-wine  { color: var(--wine3);  text-shadow: 0 0 8px var(--wine); }
+.hstat span.lit-ivy   { color: var(--ivy3);   text-shadow: 0 0 8px var(--ivy); }
+#power-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); transition: all .3s; }
+#power-dot.on { background: var(--pine2); box-shadow: 0 0 8px var(--pine2), 0 0 24px rgba(200,136,48,.5); }
+
+/* ── MAIN ── */
+#main { flex: 1; display: flex; overflow: hidden; position: relative; }
+#main::before {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(200,136,48,.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(106,48,128,.01) 1px, transparent 1px);
+  background-size: 65px 52px; pointer-events: none;
+}
+
+/* ── LEFT: LUTE STAGE ── */
+#lute-stage {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 8px 12px 0; position: relative; z-index: 1; overflow: hidden;
+}
+
+#stage-glow {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 55% 65% at 50% 52%, rgba(200,136,48,.0) 0%, transparent 70%);
+  pointer-events: none; transition: background .5s;
+}
+
+#lute-svg {
+  height: 100%; max-height: 510px; width: auto;
+  filter: drop-shadow(0 0 28px rgba(200,136,48,.12));
+  position: relative; z-index: 3;
+}
+
+/* String hit zones */
+.str-hit { cursor: pointer; opacity: 0; fill: transparent; }
+.str-line { pointer-events: none; transition: stroke-opacity .06s; }
+.str-line.plucked { animation: satyrpluck .6s ease-out forwards; }
+@keyframes satyrpluck {
+  0%   { stroke-width: 3.2; stroke-opacity: 1; }
+  15%  { stroke-width: 2.5; stroke-opacity: .9; }
+  100% { stroke-width: 1.2; stroke-opacity: .5; }
+}
+
+/* Pluck ripple */
+.lute-rip { pointer-events: none; animation: luterip .65s ease-out forwards; }
+@keyframes luterip {
+  0%   { r: 4; opacity: .8; } 100% { r: 24; opacity: 0; }
+}
+
+/* Fret markers */
+.fret-dot { pointer-events: none; }
+
+/* ── RIGHT PANEL ── */
+#panel {
+  width: 218px; flex-shrink: 0;
+  border-left: 1px solid var(--text3);
+  background: linear-gradient(180deg, rgba(10,8,24,.92) 0%, rgba(6,5,14,.96) 100%);
+  display: flex; flex-direction: column;
+  padding: 18px 14px; gap: 16px;
+  overflow-y: auto; position: relative; z-index: 5;
+}
+.psec { display: flex; flex-direction: column; gap: 7px; }
+.ptitle {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 3px;
+  text-transform: uppercase; color: rgba(200,136,48,.3);
+  padding-bottom: 5px; border-bottom: 1px solid rgba(200,136,48,.08);
+}
+
+.pBtn {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 5px 10px; border: 1px solid rgba(200,136,48,.18); border-radius: 2px;
+  color: rgba(200,136,48,.4); background: transparent; cursor: pointer; transition: all .15s;
+  text-align: left;
+}
+.pBtn:hover { color: var(--pine3); border-color: rgba(200,136,48,.45); }
+.pBtn.active { color: var(--pine3); border-color: var(--pine2); background: rgba(200,136,48,.07); text-shadow: 0 0 8px rgba(200,136,48,.4); }
+
+.modeBtn {
+  font-family: var(--serif); font-style: italic; font-size: 13px;
+  color: var(--text2); background: transparent;
+  border: 1px solid var(--text3); border-radius: 2px;
+  padding: 4px 10px; cursor: pointer; transition: all .15s;
+}
+.modeBtn:hover { color: var(--vine3); border-color: var(--vine2); }
+.modeBtn.active { color: var(--vine3); border-color: var(--vine2); background: rgba(106,48,128,.08); }
+
+/* frenzy meter */
+#frenzy-wrap {
+  display: flex; flex-direction: column; gap: 4px;
+}
+#frenzy-bar-outer {
+  width: 100%; height: 8px; border: 1px solid var(--text3); border-radius: 4px;
+  background: var(--deep); overflow: hidden;
+}
+#frenzy-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--ivy2), var(--vine2), var(--wine2));
+  border-radius: 4px; transition: width .15s;
+}
+#frenzy-label {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 2px;
+  color: var(--text3); text-transform: uppercase;
+  display: flex; justify-content: space-between;
+}
+#frenzy-label span { color: var(--pine2); }
+
+.kg { display:flex;flex-direction:column;align-items:center;gap:3px; }
+canvas.knob { cursor:ns-resize;display:block; }
+.kl { font-family:var(--mono);font-size:7px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(200,136,48,.3); }
+.kv { font-family:var(--mono);font-size:9px;color:rgba(200,136,48,.5);min-width:32px;text-align:center; }
+.knob-row { display:flex;gap:10px;justify-content:center;flex-wrap:wrap; }
+
+#note-display {
+  margin-top: auto; padding-top: 12px;
+  border-top: 1px solid rgba(200,136,48,.08);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+#note-name {
+  font-family: var(--goth); font-size: 26px; letter-spacing: 3px;
+  color: var(--pine2); text-shadow: 0 0 16px var(--pine), 0 0 50px rgba(200,136,48,.2);
+  line-height: 1; transition: color .1s;
+}
+#note-freq  { font-family: var(--mono); font-size: 9px; color: var(--text3); letter-spacing: 1px; }
+#deity-line {
+  font-family: var(--serif); font-style: italic; font-size: 11px;
+  color: rgba(106,48,128,.55); letter-spacing: .5px; text-align: center;
+  line-height: 1.4;
+}
+
+/* ── GLISS STRIP ── */
+#gliss-strip {
+  flex-shrink: 0;
+  border-top: 1px solid rgba(200,136,48,.1);
+  background: linear-gradient(0deg, rgba(6,5,14,.98) 0%, transparent 100%);
+  padding: 8px 20px 10px;
+  display: flex; align-items: center; gap: 8px;
+  position: relative; z-index: 10; flex-wrap: wrap;
+}
+.gliss-title {
+  font-family: var(--mono); font-size: 7px; letter-spacing: 3px;
+  text-transform: uppercase; color: rgba(200,136,48,.25); flex-shrink: 0;
+}
+.gliss-btn {
+  font-family: var(--serif); font-style: italic; font-size: 13px;
+  color: rgba(200,136,48,.38); background: transparent;
+  border: 1px solid rgba(200,136,48,.14); border-radius: 2px;
+  padding: 4px 12px; cursor: pointer; transition: all .15s;
+}
+.gliss-btn:hover { color: var(--pine3); border-color: rgba(200,136,48,.5); background: rgba(200,136,48,.04); }
+.gliss-btn.flash { color: var(--pine3); border-color: var(--pine2); background: rgba(200,136,48,.08); }
+.gliss-k { font-family:var(--mono);font-size:7px;letter-spacing:1px;color:rgba(200,136,48,.18);margin-left:2px; }
+
+/* ── WAVEFORM ── */
+#wave-bar {
+  flex-shrink: 0; height: 48px; background: var(--deep);
+  border-top: 1px solid rgba(200,136,48,.1);
+  position: relative; z-index: 10; overflow: hidden;
+}
+#wave-canvas { width:100%;height:100%;display:block; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(200,136,48,.12); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Cursor: goat hoof print -->
+<div id="cursor">
+  <svg viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="9" cy="14" rx="4.5" ry="6" fill="none" stroke="rgba(200,136,48,.75)" stroke-width="1"/>
+    <ellipse cx="17" cy="14" rx="4.5" ry="6" fill="none" stroke="rgba(200,136,48,.75)" stroke-width="1"/>
+    <ellipse cx="9"  cy="6"  rx="2.5" ry="3" fill="none" stroke="rgba(200,136,48,.45)" stroke-width=".8"/>
+    <ellipse cx="17" cy="6"  rx="2.5" ry="3" fill="none" stroke="rgba(200,136,48,.45)" stroke-width=".8"/>
+  </svg>
+</div>
+
+<canvas id="atmos"></canvas>
+
+<div id="app">
+  <div id="hdr">
+    <div>
+      <div id="logo">Thyrsus</div>
+      <div id="logo-sub">The Satyr's Lute · Court of Dionysus · Ancient Greece</div>
+    </div>
+    <div id="hdr-stats">
+      <div class="hstat">String <span id="hs-str">—</span></div>
+      <div class="hstat">Note <span id="hs-note">—</span></div>
+      <div class="hstat">Frenzy <span id="hs-frenzy">calm</span></div>
+      <div id="power-dot"></div>
+    </div>
+  </div>
+
+  <div id="main">
+    <!-- LUTE STAGE -->
+    <div id="lute-stage">
+      <div id="stage-glow"></div>
+      <svg id="lute-svg" viewBox="0 0 380 530" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="lute-glow">
+            <feGaussianBlur stdDeviation="2" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <radialGradient id="body-grad" cx="42%" cy="45%" r="58%">
+            <stop offset="0%"   stop-color="#4a2c10"/>
+            <stop offset="40%"  stop-color="#3a2008"/>
+            <stop offset="100%" stop-color="#1e0e04"/>
+          </radialGradient>
+          <radialGradient id="belly-grad" cx="40%" cy="40%" r="60%">
+            <stop offset="0%"   stop-color="#5a3818"/>
+            <stop offset="50%"  stop-color="#3e2410"/>
+            <stop offset="100%" stop-color="#281408"/>
+          </radialGradient>
+          <linearGradient id="neck-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stop-color="#2a1806"/>
+            <stop offset="35%"  stop-color="#5a3010"/>
+            <stop offset="65%"  stop-color="#6a3c14"/>
+            <stop offset="100%" stop-color="#2e1c08"/>
+          </linearGradient>
+          <linearGradient id="peg-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#c88830"/>
+            <stop offset="100%" stop-color="#8a5820"/>
+          </linearGradient>
+          <radialGradient id="rose-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="rgba(200,136,48,.35)"/>
+            <stop offset="100%" stop-color="rgba(200,136,48,.0)"/>
+          </radialGradient>
+        </defs>
+
+        <!-- ══ BODY: deep pear-shaped lute bowl ══ -->
+        <!-- Outer shadow rim -->
+        <ellipse cx="192" cy="340" rx="148" ry="155"
+          fill="rgba(0,0,0,.5)" transform="translate(4,4)"/>
+        <!-- Main body -->
+        <path d="M 192 195
+                 C 248 195 295 218 318 255
+                 C 342 294 342 342 318 380
+                 C 295 416 248 438 192 440
+                 C 136 440 89 416 66 380
+                 C 42 342 42 294 66 255
+                 C 89 218 136 195 192 195 Z"
+          fill="url(#body-grad)" stroke="rgba(200,136,48,.2)" stroke-width="1.2"/>
+        <!-- Bowl stave lines (the curved ribs of a lute) -->
+        <g fill="none" stroke="rgba(200,136,48,.08)" stroke-width=".8">
+          <path d="M 192 195 C 200 240 204 310 200 440"/>
+          <path d="M 192 195 C 220 242 228 316 218 440"/>
+          <path d="M 192 195 C 246 254 258 328 236 440"/>
+          <path d="M 192 195 C 270 268 282 344 252 440"/>
+          <path d="M 192 195 C 184 240 180 310 184 440"/>
+          <path d="M 192 195 C 164 242 156 316 166 440"/>
+          <path d="M 192 195 C 138 254 126 328 148 440"/>
+          <path d="M 192 195 C 114 268 102 344 132 440"/>
+        </g>
+        <!-- Belly (soundboard — lighter wood) -->
+        <path d="M 192 198
+                 C 240 198 282 218 304 252
+                 C 326 286 326 336 304 368
+                 C 282 400 240 418 192 418
+                 C 144 418 102 400 80 368
+                 C 58 336 58 286 80 252
+                 C 102 218 144 198 192 198 Z"
+          fill="url(#belly-grad)" stroke="rgba(200,136,48,.15)" stroke-width=".8"/>
+
+        <!-- ══ VINE INLAY along edge ══ -->
+        <path d="M 192 198 C 250 200 295 225 314 260"
+          fill="none" stroke="rgba(64,152,56,.2)" stroke-width="1.2"/>
+        <path d="M 192 418 C 250 416 295 393 314 358"
+          fill="none" stroke="rgba(64,152,56,.2)" stroke-width="1.2"/>
+        <!-- Ivy leaves scattered on body -->
+        <g fill="rgba(40,88,32,.18)" stroke="rgba(64,152,56,.12)" stroke-width=".5">
+          <path d="M 98 290 C 94 284 100 278 106 282 C 104 288 100 292 98 290"/>
+          <path d="M 285 290 C 289 284 283 278 277 282 C 279 288 283 292 285 290"/>
+          <path d="M 100 360 C 96 354 102 348 108 352 C 106 358 102 362 100 360"/>
+          <path d="M 283 360 C 287 354 281 348 275 352 C 277 358 281 362 283 360"/>
+        </g>
+
+        <!-- ══ ROSETTE (sound hole) ══ -->
+        <circle cx="192" cy="305" r="38" fill="rgba(0,0,0,.7)" stroke="rgba(200,136,48,.2)" stroke-width=".8"/>
+        <circle cx="192" cy="305" r="35" fill="url(#rose-grad)"/>
+        <!-- Rosette geometric pattern: star of Dionysus -->
+        <g fill="none" stroke="rgba(200,136,48,.3)" stroke-width=".7">
+          <circle cx="192" cy="305" r="30"/>
+          <circle cx="192" cy="305" r="22"/>
+          <circle cx="192" cy="305" r="14"/>
+          <!-- Star spokes -->
+          <line x1="192" y1="275" x2="192" y2="335"/>
+          <line x1="166" y1="290" x2="218" y2="320"/>
+          <line x1="166" y1="320" x2="218" y2="290"/>
+          <line x1="162" y1="305" x2="222" y2="305"/>
+          <line x1="174" y1="278" x2="210" y2="332"/>
+          <line x1="210" y1="278" x2="174" y2="332"/>
+        </g>
+        <!-- Rosette center decoration -->
+        <circle cx="192" cy="305" r="5" fill="rgba(200,136,48,.25)"/>
+        <!-- Grape cluster motif in rosette -->
+        <g fill="rgba(128,8,32,.35)">
+          <circle cx="192" cy="296" r="2.5"/>
+          <circle cx="187" cy="300" r="2.5"/>
+          <circle cx="197" cy="300" r="2.5"/>
+          <circle cx="184" cy="305" r="2.5"/>
+          <circle cx="192" cy="305" r="2.5"/>
+          <circle cx="200" cy="305" r="2.5"/>
+        </g>
+
+        <!-- ══ NECK ══ -->
+        <path d="M 162 200 L 155 80 L 229 80 L 222 200 Z"
+          fill="url(#neck-grad)" stroke="rgba(200,136,48,.2)" stroke-width="1"/>
+        <!-- Neck binding -->
+        <line x1="162" y1="200" x2="222" y2="200" stroke="rgba(200,136,48,.3)" stroke-width="1.5"/>
+        <!-- Neck highlight -->
+        <path d="M 165 195 L 160 85" fill="none" stroke="rgba(255,200,100,.08)" stroke-width="2" stroke-linecap="round"/>
+
+        <!-- FRETS (gut tied across neck) -->
+        <g id="fret-group" stroke="rgba(200,136,48,.22)" stroke-width="1" fill="none">
+          <line x1="157" y1="160" x2="227" y2="160"/>
+          <line x1="158" y1="140" x2="226" y2="140"/>
+          <line x1="159" y1="122" x2="225" y2="122"/>
+          <line x1="160" y1="106" x2="224" y2="106"/>
+          <line x1="161" y1="92"  x2="223" y2="92"/>
+        </g>
+        <!-- Fret position dots on neck side -->
+        <g fill="rgba(200,136,48,.25)">
+          <circle cx="151" cy="150" r="2.5"/>
+          <circle cx="151" cy="131" r="2.5"/>
+          <circle cx="151" cy="114" r="2.5"/>
+        </g>
+
+        <!-- ══ PEGBOX (angled back like a lute) ══ -->
+        <path d="M 155 80 C 148 70 140 55 138 38
+                 C 137 28 140 20 148 16
+                 L 162 12
+                 C 170 10 176 14 178 24
+                 L 180 36
+                 Z"
+          fill="url(#neck-grad)" stroke="rgba(200,136,48,.25)" stroke-width="1"/>
+        <path d="M 229 80 C 236 70 244 55 246 38
+                 C 247 28 244 20 236 16
+                 L 222 12
+                 C 214 10 208 14 206 24
+                 L 204 36
+                 Z"
+          fill="url(#neck-grad)" stroke="rgba(200,136,48,.25)" stroke-width="1"/>
+        <!-- Pegbox back -->
+        <path d="M 162 12 L 148 16 L 138 38 L 140 55 L 148 70 L 155 80
+                 L 229 80 L 236 70 L 246 55 L 248 38 L 236 16 L 222 12 Z"
+          fill="rgba(30,14,4,.6)" stroke="rgba(200,136,48,.18)" stroke-width=".8"/>
+
+        <!-- TUNING PEGS (8 strings — 4 pairs) -->
+        <g fill="url(#peg-grad)" stroke="rgba(200,136,48,.35)" stroke-width=".6">
+          <!-- Left pegs -->
+          <ellipse cx="148" cy="22" rx="4" ry="6" transform="rotate(-15 148 22)"/>
+          <ellipse cx="145" cy="35" rx="4" ry="6" transform="rotate(-15 145 35)"/>
+          <ellipse cx="143" cy="48" rx="4" ry="6" transform="rotate(-15 143 48)"/>
+          <ellipse cx="142" cy="61" rx="4" ry="6" transform="rotate(-12 142 61)"/>
+          <!-- Right pegs -->
+          <ellipse cx="236" cy="22" rx="4" ry="6" transform="rotate(15 236 22)"/>
+          <ellipse cx="239" cy="35" rx="4" ry="6" transform="rotate(15 239 35)"/>
+          <ellipse cx="241" cy="48" rx="4" ry="6" transform="rotate(15 241 48)"/>
+          <ellipse cx="242" cy="61" rx="4" ry="6" transform="rotate(12 242 61)"/>
+        </g>
+        <!-- Peg knobs -->
+        <g fill="rgba(200,136,48,.6)">
+          <circle cx="141" cy="21" r="2.5"/>
+          <circle cx="138" cy="34" r="2.5"/>
+          <circle cx="136" cy="47" r="2.5"/>
+          <circle cx="135" cy="59" r="2.5"/>
+          <circle cx="243" cy="21" r="2.5"/>
+          <circle cx="246" cy="34" r="2.5"/>
+          <circle cx="248" cy="47" r="2.5"/>
+          <circle cx="249" cy="59" r="2.5"/>
+        </g>
+
+        <!-- Nut (bone piece at top of neck) -->
+        <rect x="161" y="78" width="62" height="4" rx="1"
+          fill="#c8b898" stroke="rgba(200,136,48,.3)" stroke-width=".5"/>
+
+        <!-- ══ SATYR FACE carved into pegbox ══ -->
+        <g transform="translate(192,46)" opacity=".5">
+          <!-- Horns -->
+          <path d="M-8 -16 C-14 -22 -16 -30 -12 -34 C-10 -36 -7 -34 -6 -28 C-5 -22 -5 -16 -8 -16"
+            fill="none" stroke="rgba(200,136,48,.6)" stroke-width="1"/>
+          <path d="M8 -16 C14 -22 16 -30 12 -34 C10 -36 7 -34 6 -28 C5 -22 5 -16 8 -16"
+            fill="none" stroke="rgba(200,136,48,.6)" stroke-width="1"/>
+          <!-- Face -->
+          <ellipse cx="0" cy="-8" rx="10" ry="12" fill="none" stroke="rgba(200,136,48,.4)" stroke-width=".8"/>
+          <!-- Eyes -->
+          <ellipse cx="-4" cy="-10" rx="2" ry="2.5" fill="rgba(128,8,32,.5)"/>
+          <ellipse cx="4"  cy="-10" rx="2" ry="2.5" fill="rgba(128,8,32,.5)"/>
+          <!-- Grin -->
+          <path d="M-5 -3 C-2 0 2 0 5 -3" fill="none" stroke="rgba(200,136,48,.5)" stroke-width=".8"/>
+          <!-- Beard wisps -->
+          <path d="M-6 2 C-8 6 -7 10 -4 12" fill="none" stroke="rgba(200,136,48,.3)" stroke-width=".7"/>
+          <path d="M0 3 C0 8 0 12 0 14"    fill="none" stroke="rgba(200,136,48,.3)" stroke-width=".7"/>
+          <path d="M6 2 C8 6 7 10 4 12"    fill="none" stroke="rgba(200,136,48,.3)" stroke-width=".7"/>
+        </g>
+
+        <!-- ══ BRIDGE ══ -->
+        <rect x="162" y="362" width="60" height="8" rx="2"
+          fill="#5a3010" stroke="rgba(200,136,48,.3)" stroke-width=".8"/>
+        <rect x="162" y="360" width="60" height="2" rx="1"
+          fill="rgba(200,136,48,.3)"/>
+
+        <!-- ══ STRINGS (drawn by JS) ══ -->
+        <g id="strings-group"></g>
+        <g id="ripple-group"></g>
+
+        <!-- Tailpiece -->
+        <path d="M 168 430 L 162 450 L 222 450 L 216 430 Z"
+          fill="#3a1e08" stroke="rgba(200,136,48,.2)" stroke-width=".8"/>
+        <ellipse cx="192" cy="450" rx="14" ry="5"
+          fill="rgba(200,136,48,.15)" stroke="rgba(200,136,48,.2)" stroke-width=".5"/>
+
+        <!-- Strap button -->
+        <circle cx="192" cy="440" r="5" fill="#3a1e08" stroke="rgba(200,136,48,.25)" stroke-width=".8"/>
+        <circle cx="192" cy="440" r="2" fill="rgba(200,136,48,.4)"/>
+
+      </svg>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div id="panel">
+      <div class="psec">
+        <div class="ptitle">✦ Tuning</div>
+        <button class="pBtn active" data-tuning="dorian">Dorian</button>
+        <button class="pBtn" data-tuning="phrygian">Phrygian</button>
+        <button class="pBtn" data-tuning="lydian">Lydian</button>
+        <button class="pBtn" data-tuning="mixolydian">Mixolydian</button>
+        <button class="pBtn" data-tuning="bacchic">Bacchic</button>
+      </div>
+
+      <div class="psec">
+        <div class="ptitle">✦ Playing Style</div>
+        <button class="modeBtn active" data-style="pluck">Pluck</button>
+        <button class="modeBtn" data-style="strum">Strum</button>
+        <button class="modeBtn" data-style="wild">Wild</button>
+      </div>
+
+      <div class="psec">
+        <div class="ptitle">✦ Frenzy</div>
+        <div id="frenzy-wrap">
+          <div id="frenzy-bar-outer"><div id="frenzy-fill"></div></div>
+          <div id="frenzy-label">calm <span id="frenzy-val">0%</span> dionysian</div>
+        </div>
+        <div style="font-family:var(--serif);font-style:italic;font-size:11px;color:rgba(106,48,128,.4);line-height:1.4;margin-top:2px;">
+          Play faster to build frenzy. High frenzy adds grit & dissonance.
+        </div>
+      </div>
+
+      <div class="psec">
+        <div class="ptitle">✦ Parameters</div>
+        <div class="knob-row">
+          <div class="kg">
+            <canvas class="knob" id="k-reverb"  width="44" height="44" data-min="0" data-max="1"   data-val="0.45" data-color="#c88830"></canvas>
+            <div class="kl">Reverb</div><div class="kv" id="v-reverb">0.45</div>
+          </div>
+          <div class="kg">
+            <canvas class="knob" id="k-sustain" width="44" height="44" data-min="0.2" data-max="5" data-val="1.8"  data-color="#e8b050"></canvas>
+            <div class="kl">Sustain</div><div class="kv" id="v-sustain">1.80</div>
+          </div>
+        </div>
+        <div class="knob-row">
+          <div class="kg">
+            <canvas class="knob" id="k-tone"    width="44" height="44" data-min="0" data-max="1"   data-val="0.6"  data-color="#9a50b8"></canvas>
+            <div class="kl">Tone</div><div class="kv" id="v-tone">0.60</div>
+          </div>
+          <div class="kg">
+            <canvas class="knob" id="k-resin"   width="44" height="44" data-min="0" data-max="1"   data-val="0.4"  data-color="#409838"></canvas>
+            <div class="kl">Resin</div><div class="kv" id="v-resin">0.40</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="note-display">
+        <div id="note-name">—</div>
+        <div id="note-freq">— Hz</div>
+        <div id="deity-line">Pan plays at the edge<br>of the world</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAVEFORM -->
+  <div id="wave-bar"><canvas id="wave-canvas"></canvas></div>
+
+  <!-- GLISSANDO / RIFF STRIP -->
+  <div id="gliss-strip">
+    <span class="gliss-title">✦ Bacchic Riffs</span>
+    <button class="gliss-btn" data-riff="ascend">Ascend <span class="gliss-k">[1]</span></button>
+    <button class="gliss-btn" data-riff="dance">Dance <span class="gliss-k">[2]</span></button>
+    <button class="gliss-btn" data-riff="invocation">Invocation <span class="gliss-k">[3]</span></button>
+    <button class="gliss-btn" data-riff="revel">Revel <span class="gliss-k">[4]</span></button>
+    <button class="gliss-btn" data-riff="frenzy">Frenzy <span class="gliss-k">[5]</span></button>
+    <button class="gliss-btn" data-riff="lament">Lament <span class="gliss-k">[6]</span></button>
+    <div style="margin-left:auto;font-family:var(--mono);font-size:7px;letter-spacing:2px;color:rgba(200,136,48,.18);">CLICK STRINGS · KEYS A–K</div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// THYRSUS — The Satyr's Lute
+// Pan, Dionysus, the wine-dark dance, the forest at midnight
+// ══════════════════════════════════════════════════════════════
+
+let actx = null, convolver = null, analyser = null;
+let frenzyLevel = 0;      // 0–1, builds with playing speed
+let lastPlayTime = 0;
+let frenzyDecayInterval = null;
+
+function getCtx() {
+  if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === 'suspended') actx.resume();
+  if (!convolver) buildReverb();
+  if (!analyser) {
+    analyser = actx.createAnalyser(); analyser.fftSize = 512;
+    analyser.connect(actx.destination);
+  }
+  return actx;
+}
+
+const P = {
+  reverb: 0.45, sustain: 1.8, tone: 0.6, resin: 0.4,
+  tuning: 'dorian', style: 'pluck',
+};
+
+// ══════════════════════════════════════════════════════════════
+// GREEK MODES
+// The actual Greek modes (not the medieval misnomers)
+// Rooted on E2 (MIDI 40) for authentic lute range
+// ══════════════════════════════════════════════════════════════
+const TUNINGS = {
+  dorian:     [0,2,3,5,7,9,10,12,14,15,17,19],  // E Dorian: whole-half-whole-whole-whole-half-whole
+  phrygian:   [0,1,3,5,7,8,10,12,13,15,17,19],  // E Phrygian: the dark one, half-whole pattern
+  lydian:     [0,2,4,6,7,9,11,12,14,16,18,19],  // E Lydian: raised 4th, ethereal
+  mixolydian: [0,2,4,5,7,9,10,12,14,16,17,19],  // E Mixolydian: major with flat 7, bluesy
+  bacchic:    [0,2,3,7,8,10,12,14,15,19,20,22], // Invented: pentatonic + chromatic passing tones
+};
+
+const DEITY_LINES = {
+  dorian:     'Pan dances at the crossroads\nwhere two roads meet',
+  phrygian:   'Dionysus descends from Thrace\nwild-eyed and laughing',
+  lydian:     'Apollo lifts the lyre\nthe Muses turn to listen',
+  mixolydian: 'Silenus stumbles through\nthe vines, singing anyway',
+  bacchic:    'The maenads run\nthrough the dark pines',
+};
+
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NUM_STRINGS = 8;
+const BASE_MIDI   = 40; // E2
+
+function getStringMidi(idx) {
+  const offsets = TUNINGS[P.tuning];
+  return BASE_MIDI + (offsets[idx] || idx*2);
+}
+function midiToFreq(n) { return 440 * Math.pow(2,(n-69)/12); }
+function midiName(n)   { return NOTE_NAMES[n%12]+(Math.floor(n/12)-1); }
+
+// ══════════════════════════════════════════════════════════════
+// REVERB: outdoor grove, wine-soaked night
+// Mid-length, slightly uneven — not a hall, more like trees
+// ══════════════════════════════════════════════════════════════
+function buildReverb() {
+  const c = actx;
+  const dur = 2.8;
+  const len = c.sampleRate * dur;
+  const buf = c.createBuffer(2, len, c.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = buf.getChannelData(ch);
+    for (let i = 0; i < len; i++) {
+      // Grove reverb: slightly organic, not perfect
+      const env = Math.pow(1-i/len, 1.8) * (0.7 + 0.3*Math.sin(i*0.00031));
+      d[i] = (Math.random()*2-1) * env;
+      // Early reflection cluster
+      if (i < c.sampleRate*0.04 && Math.random() < 0.003)
+        d[i] += (Math.random()*2-1)*0.6;
+    }
+  }
+  if (convolver) try { convolver.disconnect(); } catch(e){}
+  convolver = c.createConvolver(); convolver.buffer = buf;
+  convolver.connect(c.destination);
+}
+
+// ══════════════════════════════════════════════════════════════
+// SATYR LUTE VOICE
+// Gut strings over a carved wooden body:
+// - strong fundamental + 2nd harmonic (gut string character)
+// - pine resin noise at attack (bow/pluck friction)
+// - body resonance peak (the wood speaks)
+// - frenzy adds inharmonic roughness + pitch instability
+// ══════════════════════════════════════════════════════════════
+function pluckString(idx, vel=0.75) {
+  const c = getCtx();
+  const midi  = getStringMidi(idx);
+  const freq  = midiToFreq(midi);
+  const now   = c.currentTime;
+  const decay = P.sustain;
+  const t     = idx/(NUM_STRINGS-1); // 0=bass, 1=treble
+
+  animateString(idx);
+  addRippleSVG(idx);
+  updateDisplay(idx, midi, freq);
+  buildFrenzy();
+
+  const master = c.createGain(); master.gain.value = 1;
+
+  // ── Style variations ──
+  const style = P.style;
+
+  if (style === 'wild') {
+    // Wild: random detune, extra harmonics, growl
+    playWildString(c, freq, vel, now, decay, master);
+  } else {
+    // Core gut string voice
+    playGutString(c, freq, vel, now, decay, master, style);
+  }
+
+  // ── Frenzy roughness ──
+  if (frenzyLevel > 0.3) {
+    addFrenzyLayer(c, freq, vel, now, decay, master);
+  }
+
+  // ── Tone filter ──
+  const lpf = c.createBiquadFilter(); lpf.type='lowpass';
+  lpf.frequency.value = 400 + P.tone*5500;
+  lpf.Q.value = 0.8;
+  master.connect(lpf);
+
+  // ── Body resonance (the wood) ──
+  if (P.resin > 0.05) {
+    const body = c.createBiquadFilter(); body.type='peaking';
+    body.frequency.value = 280 + t*180; // different body peak per string
+    body.gain.value = P.resin * 9;
+    body.Q.value = 2.2;
+    lpf.connect(body);
+
+    const dry=c.createGain(); dry.gain.value=1-P.reverb*0.88;
+    const wet=c.createGain(); wet.gain.value=P.reverb*0.88;
+    body.connect(dry); dry.connect(analyser);
+    body.connect(wet); wet.connect(convolver);
+  } else {
+    const dry=c.createGain(); dry.gain.value=1-P.reverb*0.88;
+    const wet=c.createGain(); wet.gain.value=P.reverb*0.88;
+    lpf.connect(dry); dry.connect(analyser);
+    lpf.connect(wet); wet.connect(convolver);
+  }
+}
+
+function playGutString(c, freq, vel, now, decay, master, style) {
+  const isStrum = style === 'strum';
+  const atkTime = isStrum ? 0.005 : 0.002;
+
+  // Harmonic series for gut string
+  const harmonics = [1, 2, 3, 4, 5, 6, 7];
+  const hAmps     = [0.65, 0.38, 0.2, 0.1, 0.055, 0.028, 0.014];
+  const hDecay    = [1.0,  0.82, 0.65, 0.5, 0.38,  0.26,  0.18];
+
+  harmonics.forEach((h, i) => {
+    const osc = c.createOscillator();
+    osc.type = h === 1 ? 'triangle' : 'sine';
+    osc.frequency.value = freq * h;
+    osc.detune.value = (Math.random()-0.5)*(1.5 + frenzyLevel*4);
+
+    const g = c.createGain();
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(vel*hAmps[i], now+atkTime);
+    g.gain.exponentialRampToValueAtTime(0.001, now+decay*hDecay[i]);
+
+    osc.connect(g); g.connect(master);
+    osc.start(now); osc.stop(now+decay+0.1);
+  });
+
+  // Gut string pluck noise (resin on string)
+  if (P.resin > 0.05) {
+    const nb = c.createBuffer(1,Math.floor(c.sampleRate*0.04),c.sampleRate);
+    const nd = nb.getChannelData(0);
+    for(let i=0;i<nd.length;i++) nd[i]=(Math.random()*2-1)*Math.exp(-i/(c.sampleRate*0.008));
+    const ns = c.createBufferSource(); ns.buffer=nb;
+    const nbpf = c.createBiquadFilter(); nbpf.type='bandpass';
+    nbpf.frequency.value=freq*2.2; nbpf.Q.value=1.8;
+    const ng = c.createGain(); ng.gain.value=vel*P.resin*0.45;
+    ns.connect(nbpf); nbpf.connect(ng); ng.connect(master);
+    ns.start(now); ns.stop(now+0.05);
+  }
+
+  // Sub thud for bass strings
+  if (freq < 300) {
+    const sub = c.createOscillator(); sub.type='sine';
+    sub.frequency.value=freq*0.5;
+    sub.frequency.exponentialRampToValueAtTime(freq*0.45, now+0.1);
+    const sg = c.createGain();
+    sg.gain.setValueAtTime(vel*0.2, now+0.003);
+    sg.gain.exponentialRampToValueAtTime(0.001, now+decay*0.4);
+    sub.connect(sg); sg.connect(master);
+    sub.start(now); sub.stop(now+decay*0.45);
+  }
+}
+
+function playWildString(c, freq, vel, now, decay, master) {
+  // Wild style: multiple detuned copies, unstable pitch, scratchy
+  const copies = 3;
+  for(let ci=0;ci<copies;ci++){
+    const detuneCents = (ci-1) * (8 + frenzyLevel*20) + (Math.random()-0.5)*5;
+    const osc = c.createOscillator();
+    osc.type = ci===0?'sawtooth':'triangle';
+    osc.frequency.value = freq;
+    osc.detune.value = detuneCents;
+    // Pitch wobble
+    const lfo = c.createOscillator(); lfo.frequency.value=3+Math.random()*4;
+    const lfoG = c.createGain(); lfoG.gain.value=4+frenzyLevel*12;
+    lfo.connect(lfoG); lfoG.connect(osc.detune);
+    const g = c.createGain();
+    g.gain.setValueAtTime(vel*[0.5,0.28,0.18][ci], now+0.004);
+    g.gain.exponentialRampToValueAtTime(0.001, now+decay*(1-ci*0.15));
+    osc.connect(g); g.connect(master);
+    osc.start(now); osc.stop(now+decay+0.1);
+    lfo.start(now); lfo.stop(now+decay+0.1);
+  }
+  // Scratchy bow noise
+  const nb=c.createBuffer(1,Math.floor(c.sampleRate*0.12),c.sampleRate);
+  const nd=nb.getChannelData(0);
+  for(let i=0;i<nd.length;i++) nd[i]=(Math.random()*2-1)*Math.exp(-i/(c.sampleRate*0.04));
+  const ns=c.createBufferSource();ns.buffer=nb;
+  const nbpf=c.createBiquadFilter();nbpf.type='bandpass';nbpf.frequency.value=freq*1.5;nbpf.Q.value=0.8;
+  const ng=c.createGain();ng.gain.value=vel*0.35;
+  ns.connect(nbpf);nbpf.connect(ng);ng.connect(master);
+  ns.start(now);ns.stop(now+0.13);
+}
+
+function addFrenzyLayer(c, freq, vel, now, decay, master) {
+  // Frenzy: inharmonic overtone + distortion impulse
+  const buzzFreq = freq * (3.01 + frenzyLevel*0.08); // slightly off-third-harmonic
+  const buzz = c.createOscillator(); buzz.type='square'; buzz.frequency.value=buzzFreq;
+  const bg = c.createGain();
+  bg.gain.setValueAtTime(vel*frenzyLevel*0.15, now+0.01);
+  bg.gain.exponentialRampToValueAtTime(0.001, now+decay*0.3);
+  buzz.connect(bg); bg.connect(master);
+  buzz.start(now); buzz.stop(now+decay*0.35);
+}
+
+// ══════════════════════════════════════════════════════════════
+// FRENZY METER
+// Builds when you play fast, decays when you stop
+// At high frenzy: more grit, inharmonic, distorted — dionysian
+// ══════════════════════════════════════════════════════════════
+function buildFrenzy() {
+  const now = performance.now();
+  const gap  = now - lastPlayTime;
+  lastPlayTime = now;
+
+  // Fast playing builds frenzy
+  if (gap < 400) {
+    frenzyLevel = Math.min(1, frenzyLevel + 0.12);
+  } else if (gap < 800) {
+    frenzyLevel = Math.min(1, frenzyLevel + 0.04);
+  }
+
+  updateFrenzyUI();
+
+  // Start decay interval if not running
+  if (!frenzyDecayInterval) {
+    frenzyDecayInterval = setInterval(() => {
+      frenzyLevel = Math.max(0, frenzyLevel - 0.015);
+      updateFrenzyUI();
+      if (frenzyLevel === 0) {
+        clearInterval(frenzyDecayInterval);
+        frenzyDecayInterval = null;
+      }
+    }, 200);
+  }
+}
+
+function updateFrenzyUI() {
+  const pct = Math.round(frenzyLevel * 100);
+  document.getElementById('frenzy-fill').style.width = pct+'%';
+  document.getElementById('frenzy-val').textContent  = pct+'%';
+  const el = document.getElementById('hs-frenzy');
+  if (frenzyLevel < 0.2)      { el.textContent='calm';     el.className='lit-ivy'; }
+  else if (frenzyLevel < 0.5) { el.textContent='roused';   el.className='lit-pine'; }
+  else if (frenzyLevel < 0.8) { el.textContent='ecstatic'; el.className='lit-vine'; }
+  else                         { el.textContent='MAENAD';   el.className='lit-wine'; }
+}
+
+// ══════════════════════════════════════════════════════════════
+// BACCHIC RIFFS
+// Rhythmic patterns based on Greek dithyrambic poetry rhythms
+// ══════════════════════════════════════════════════════════════
+function playRiff(type) {
+  const btn = document.querySelector(`.gliss-btn[data-riff="${type}"]`);
+  if (btn) { btn.classList.add('flash'); setTimeout(()=>btn.classList.remove('flash'),400); }
+  getCtx();
+
+  const fast = P.style === 'wild' ? 55 : 70;
+
+  switch(type) {
+
+    case 'ascend': {
+      for(let i=0;i<NUM_STRINGS;i++)
+        setTimeout(()=>pluckString(i, 0.5+Math.random()*0.35), i*fast);
+      break;
+    }
+
+    case 'dance': {
+      // Bacchic foot: long-short-short (dactyl) — the beat of the dance
+      const pat=[0,2,4,2,5,7,5,4,7,9,7,5,4,2,0];
+      pat.forEach((s,i)=>setTimeout(()=>pluckString(Math.min(s,NUM_STRINGS-1),0.5+Math.random()*0.3),i*(i%3===0?100:55)));
+      break;
+    }
+
+    case 'invocation': {
+      // Slow, rising, ceremonial — calling Dionysus
+      const inv=[0,0,3,3,5,5,7,7,5,3,7,7,10,10];
+      inv.forEach((s,i)=>setTimeout(()=>pluckString(Math.min(s,NUM_STRINGS-1),0.6+Math.random()*0.3),i*130));
+      break;
+    }
+
+    case 'revel': {
+      // Dense overlapping — the party is going
+      for(let i=0;i<16;i++){
+        const s=Math.floor(Math.random()*NUM_STRINGS);
+        setTimeout(()=>pluckString(s, 0.45+Math.random()*0.45), i*48);
+      }
+      break;
+    }
+
+    case 'frenzy': {
+      // Maximum chaos — all strings rapid fire with random velocity
+      let t=0;
+      for(let i=0;i<24;i++){
+        const s=Math.floor(Math.random()*NUM_STRINGS);
+        const delay=t;
+        t+=20+Math.random()*40;
+        setTimeout(()=>pluckString(s,0.4+Math.random()*0.6),delay);
+      }
+      break;
+    }
+
+    case 'lament': {
+      // Slow descend — the morning after, someone is gone
+      const lam=[7,7,5,5,3,3,2,2,0,0];
+      lam.forEach((s,i)=>setTimeout(()=>pluckString(Math.min(s,NUM_STRINGS-1),0.55+Math.random()*0.25),i*180));
+      break;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// SVG STRING GEOMETRY
+// 8 strings over the lute body
+// Top: nut (y=80), Bottom: bridge (y=362)
+// Strings fan slightly from close together at nut to wider at bridge
+// ══════════════════════════════════════════════════════════════
+const STRING_DATA = [];
+
+function buildStrings() {
+  STRING_DATA.length = 0;
+  const g = document.getElementById('strings-group');
+  g.innerHTML = '';
+
+  const nutY=81, bridgeY=362;
+  const nutXs   =[170,176,182,188,194,200,206,212];
+  const bridgeXs =[165,172,179,187,196,203,211,219];
+
+  for(let i=0;i<NUM_STRINGS;i++){
+    const t = i/(NUM_STRINGS-1);
+    const nx=nutXs[i], ny=nutY;
+    const bx=bridgeXs[i], by=bridgeY;
+    const thick = 2.2-t*1.3;
+    // Color: low strings more golden/warm, high strings more silver/thin
+    const r=Math.round(180+t*30), gv=Math.round(100+t*50), bv=Math.round(10+t*25);
+    const alpha=0.35+t*0.2;
+    STRING_DATA.push({nx,ny,bx,by,thick});
+
+    // Hit zone
+    const hit=document.createElementNS('http://www.w3.org/2000/svg','line');
+    hit.setAttribute('x1',nx);hit.setAttribute('y1',ny);
+    hit.setAttribute('x2',bx);hit.setAttribute('y2',by);
+    hit.setAttribute('stroke','transparent');hit.setAttribute('stroke-width','20');
+    hit.setAttribute('class','str-hit');hit.dataset.string=i;
+    g.appendChild(hit);
+
+    // Visible string
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',nx);line.setAttribute('y1',ny);
+    line.setAttribute('x2',bx);line.setAttribute('y2',by);
+    line.setAttribute('stroke',`rgba(${r},${gv},${bv},${alpha})`);
+    line.setAttribute('stroke-width',thick.toFixed(2));
+    line.setAttribute('class','str-line');
+    line.setAttribute('id',`str-line-${i}`);
+    g.appendChild(line);
+
+    hit.addEventListener('click',()=>{getCtx();pluckString(i,0.65+Math.random()*0.35);});
+    hit.addEventListener('touchstart',e=>{e.preventDefault();getCtx();pluckString(i,0.65+Math.random()*0.35);},{passive:false});
+  }
+}
+
+function animateString(idx) {
+  const el=document.getElementById(`str-line-${idx}`);
+  if(!el)return;
+  el.classList.remove('plucked');
+  void el.offsetWidth;
+  el.classList.add('plucked');
+  setTimeout(()=>el.classList.remove('plucked'),650);
+
+  // Stage glow pulses with frenzy color
+  const sg=document.getElementById('stage-glow');
+  const fc=frenzyLevel>0.7?'rgba(200,40,56,.18)':frenzyLevel>0.4?'rgba(106,48,128,.15)':'rgba(200,136,48,.1)';
+  sg.style.background=`radial-gradient(ellipse 55% 65% at 50% 52%, ${fc} 0%, transparent 70%)`;
+  clearTimeout(window._glowT);
+  window._glowT=setTimeout(()=>sg.style.background=`radial-gradient(ellipse 55% 65% at 50% 52%, rgba(200,136,48,.0) 0%, transparent 70%)`,700);
+}
+
+function addRippleSVG(idx) {
+  const s=STRING_DATA[idx]; if(!s)return;
+  const mx=(s.nx+s.bx)/2, my=(s.ny+s.by)/2;
+  const rg=document.getElementById('ripple-group');
+  const rip=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  rip.setAttribute('cx',mx);rip.setAttribute('cy',my);rip.setAttribute('r','4');
+  rip.setAttribute('fill','none');
+  const col=frenzyLevel>0.7?'rgba(200,40,56,.6)':frenzyLevel>0.4?'rgba(154,80,184,.6)':'rgba(200,136,48,.55)';
+  rip.setAttribute('stroke',col);rip.setAttribute('stroke-width','1');
+  rip.setAttribute('class','lute-rip');
+  rg.appendChild(rip);
+  setTimeout(()=>rip.remove(),700);
+}
+
+function updateDisplay(idx,midi,freq) {
+  document.getElementById('note-name').textContent=NOTE_NAMES[midi%12];
+  document.getElementById('note-freq').textContent=freq.toFixed(2)+' Hz';
+  document.getElementById('hs-str').textContent=idx+1;
+  document.getElementById('hs-note').textContent=midiName(midi);
+  ['hs-str','hs-note'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.className=frenzyLevel>0.6?'lit-wine':frenzyLevel>0.35?'lit-vine':'lit-pine';
+    clearTimeout(el._t);el._t=setTimeout(()=>el.className='',450);
+  });
+  document.getElementById('power-dot').classList.add('on');
+  clearTimeout(window._dotT);window._dotT=setTimeout(()=>document.getElementById('power-dot').classList.remove('on'),500);
+}
+
+// ── KEYBOARD ──
+const KB = {a:0,s:1,d:2,f:3,g:4,h:5,j:6,k:7};
+document.addEventListener('keydown',e=>{
+  if(e.repeat||e.target.tagName==='INPUT')return;
+  const key=e.key.toLowerCase();
+  if(KB[key]!==undefined){getCtx();pluckString(KB[key],0.65+Math.random()*0.35);return;}
+  const rm={'1':'ascend','2':'dance','3':'invocation','4':'revel','5':'frenzy','6':'lament'};
+  if(rm[key])playRiff(rm[key]);
+});
+
+// ── BUTTONS ──
+document.querySelectorAll('.pBtn[data-tuning]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.pBtn[data-tuning]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');P.tuning=btn.dataset.tuning;
+    document.getElementById('deity-line').textContent=DEITY_LINES[P.tuning];
+  });
+});
+document.querySelectorAll('.modeBtn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.modeBtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');P.style=btn.dataset.style;
+  });
+});
+document.querySelectorAll('.gliss-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>playRiff(btn.dataset.riff));
+});
+
+// ── KNOBS ──
+function setupKnobs(){
+  document.querySelectorAll('canvas.knob').forEach(canvas=>{
+    const id=canvas.id,min=parseFloat(canvas.dataset.min),max=parseFloat(canvas.dataset.max);
+    let val=parseFloat(canvas.dataset.val);
+    const color=canvas.dataset.color||'#c88830';
+    const valEl=document.getElementById('v-'+id.replace('k-',''));
+    function draw(){
+      const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,cx=w/2,cy=h/2,r=w*0.36;
+      ctx.clearRect(0,0,w,h);
+      const sA=Math.PI*0.75,eA=Math.PI*2.25,t=(val-min)/(max-min),cA=sA+t*(eA-sA);
+      ctx.beginPath();ctx.arc(cx,cy,r,sA,eA);ctx.strokeStyle='rgba(200,136,48,.12)';ctx.lineWidth=3;ctx.lineCap='round';ctx.stroke();
+      ctx.beginPath();ctx.arc(cx,cy,r,sA,cA);ctx.strokeStyle=color;ctx.lineWidth=3;ctx.stroke();
+      const dx=cx+r*Math.cos(cA),dy=cy+r*Math.sin(cA);
+      ctx.beginPath();ctx.arc(dx,dy,2.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+      ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);ctx.fillStyle='#1e1830';ctx.fill();
+      ctx.beginPath();ctx.arc(cx,cy,1.5,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+    }
+    let dragY=null,dragVal=null;
+    canvas.addEventListener('mousedown',e=>{dragY=e.clientY;dragVal=val;e.preventDefault();});
+    document.addEventListener('mousemove',e=>{if(dragY===null)return;val=Math.max(min,Math.min(max,dragVal+(dragY-e.clientY)*(max-min)/140));draw();onKnob(id,val,valEl);});
+    document.addEventListener('mouseup',()=>{dragY=null;});
+    draw();onKnob(id,val,valEl);
+  });
+}
+function onKnob(id,val,el){
+  const map={
+    'k-reverb':  v=>{P.reverb=v;  el.textContent=v.toFixed(2);},
+    'k-sustain': v=>{P.sustain=v; el.textContent=v.toFixed(2);},
+    'k-tone':    v=>{P.tone=v;    el.textContent=v.toFixed(2);},
+    'k-resin':   v=>{P.resin=v;   el.textContent=v.toFixed(2);},
+  };
+  if(map[id])map[id](val);
+}
+
+// ── WAVEFORM ──
+const waveCanvas=document.getElementById('wave-canvas');
+const wCtx=waveCanvas.getContext('2d');
+function resizeWave(){waveCanvas.width=waveCanvas.offsetWidth;waveCanvas.height=waveCanvas.offsetHeight;}
+function drawWave(){
+  requestAnimationFrame(drawWave);
+  const W=waveCanvas.width,H=waveCanvas.height;
+  wCtx.clearRect(0,0,W,H);
+  if(!analyser)return;
+  const buf=new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteTimeDomainData(buf);
+  // Color shifts with frenzy
+  const r=Math.round(200+frenzyLevel*55),gv=Math.round(136-frenzyLevel*100),bv=Math.round(48-frenzyLevel*28);
+  wCtx.strokeStyle=`rgba(${r},${gv},${bv},.6)`;
+  wCtx.lineWidth=1.2;wCtx.shadowColor=`rgb(${r},${gv},${bv})`;wCtx.shadowBlur=4;
+  wCtx.beginPath();
+  const step=W/buf.length;
+  for(let i=0;i<buf.length;i++){const x=i*step,y=(buf[i]/128-1)*(H*0.42)+H/2;i===0?wCtx.moveTo(x,y):wCtx.lineTo(x,y);}
+  wCtx.stroke();wCtx.shadowBlur=0;
+}
+
+// ── ATMOSPHERE: vine leaves, wine drops, sparks ──
+const atmosCanvas=document.getElementById('atmos');
+const aC=atmosCanvas.getContext('2d');
+let forestMotes=[];
+function initAtmos(){
+  atmosCanvas.width=window.innerWidth;atmosCanvas.height=window.innerHeight;
+  forestMotes=Array.from({length:40},()=>({
+    x:Math.random()*atmosCanvas.width,
+    y:Math.random()*atmosCanvas.height,
+    r:Math.random()*1.2+0.2,
+    sp:Math.random()*0.1+0.015,
+    o:Math.random()*0.1+0.01,
+    t:Math.random()*Math.PI*2,
+    drift:(Math.random()-.5)*.25,
+    type:Math.floor(Math.random()*3), // 0=pine, 1=vine, 2=wine
+  }));
+}
+function drawAtmos(){
+  requestAnimationFrame(drawAtmos);
+  aC.clearRect(0,0,atmosCanvas.width,atmosCanvas.height);
+  const frenzyBoost = 1+frenzyLevel*2;
+  forestMotes.forEach(p=>{
+    p.t+=p.sp*.016*frenzyBoost;
+    p.x+=p.drift+Math.sin(p.t*.6)*.3;
+    p.y-=p.sp*.2*frenzyBoost;
+    if(p.y<-4){p.y=atmosCanvas.height+4;p.x=Math.random()*atmosCanvas.width;}
+    const fl=p.o*(0.5+0.5*Math.sin(p.t*2.5))*(1+frenzyLevel*.5);
+    const cols=['rgba(200,136,48,','rgba(106,48,128,','rgba(128,8,32,'];
+    aC.beginPath();aC.arc(p.x,p.y,p.r*frenzyBoost*.7,0,Math.PI*2);
+    aC.fillStyle=cols[p.type]+fl+')';
+    aC.fill();
+  });
+}
+
+// ── CURSOR ──
+const cursor=document.getElementById('cursor');
+document.addEventListener('mousemove',e=>{cursor.style.left=e.clientX+'px';cursor.style.top=e.clientY+'px';});
+
+window.addEventListener('resize',()=>{resizeWave();initAtmos();buildStrings();});
+
+setupKnobs();
+resizeWave();
+initAtmos();
+drawAtmos();
+drawWave();
+buildStrings();
+document.getElementById('deity-line').textContent=DEITY_LINES[P.tuning];
+</script>
+</body>
+</html>
